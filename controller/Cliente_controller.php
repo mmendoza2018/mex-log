@@ -9,6 +9,13 @@
 
 		}
 
+		public function ListarClientes(){
+
+			$filas = ClienteModel::ListarClientes();
+			return $filas;
+
+		}
+
 		public function Ver_Limite_Credito($idcliente){
 
 			$filas = ClienteModel::Ver_Limite_Credito($idcliente);

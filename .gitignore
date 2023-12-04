@@ -1,3 +1,5 @@
 *.sql
 *.csv
 *.xlsx
+config/app.conf.php
+model/Conexion.php

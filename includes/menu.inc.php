@@ -120,8 +120,19 @@
 
             </ul>
     </li>
-    <!-- JCV EQUIPOS A COMPAR JCV-->
+    <!-- FIN JCV EQUIPOS A COMPAR JCV-->
+    
+    <!-- LOGISTICA-->
+    <li>
+          <a href="#"><i class="icon-calculator3"></i> <span>Logistica</span></a>
+            <ul>
+                
+               <li><a href="./?View=NuevoRegistroEnvioProv">Registro de entregas</a></li>
+               <li><a href="./?View=HistorialEquiposaComprar">Historial de entregas</a></li>
 
+            </ul>
+    </li>
+    <!-- FIN LOGISTICA -->
 
     <!-- JCV CUENTAS X COBRAR JCV-->
 
