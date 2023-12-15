@@ -445,7 +445,6 @@
         "file" => "../vistas/html/bitacora_comprasOKJCV.php" 
     );
           
-          
           $conf["EditarCompras"] = array(
         "file" => "../vistas/html/editar_compraOKJCV0.php"       
     
@@ -492,6 +491,25 @@
           "file" => "../vistas/html/new_combo.php"   
         //Combos
     );
-         
-     
+
+        //LOGISTICA
+         $conf["NuevaEntradaLogistica"] = array(
+            "file" => "entradaLogistica.vw.php"
+        );
+        $conf["NuevaSalidaLogistica"] = array(
+            "file" => "salidaLogistica.vw.php"
+        );
+
+        $conf["TablaEntradaLogistica"] = array(
+            "file" => "tablaEntradaLogistica.vw.php"
+        );
+
+        $conf["TablaSalidaLogisticaCliente"] = array(
+            "file" => "tablaSalidaLogisticaCliente.vw.php"
+        );
+
+        $conf["ActualizaEntradaLogistica"] = array(
+            "file" => "ActualizaEntradaLogistica.vw.php"
+        );
+             
  ?>

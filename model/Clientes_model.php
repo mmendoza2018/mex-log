@@ -2,7 +2,7 @@
 
 require_once('Conexion.php');
 
-class ClienteModel extends Conexion
+class Clientes extends Conexion
 {
 
 	public static function ListarClientes()

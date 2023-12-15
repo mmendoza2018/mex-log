@@ -6,7 +6,7 @@
 
 
 			$driver = 'mysql'; //mysql no cambiar
-			$host = 'localhost'; //localhost
+			$host = 'localhost:3310'; //localhost
 			$dbname = 'dbinventario'; //bdd
 			$username ='root'; //usuario
 			$passwd = ''; //contrase�a

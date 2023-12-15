@@ -35,9 +35,10 @@ class OrdenCompra extends Conexion
 		$dbconec = Conexion::Conectar();
 
 		try {
-			$query = "SELECT * FROM detalle_fact_compra df INNER JOIN productos p ON df.id_producto = p.id_producto";  
+			$query = "SELECT * FROM detalle_fact_compra df INNER JOIN productos prod ON df.id_producto = prod.id_producto";  
+			$query .= " INNER JOIN proveedores prov ON prod.id_proveedor = prov.id_proveedor";
 			$query .= " WHERE id_factura = $idOrdenCompra";
-
+			
 			$stmt = $dbconec->prepare($query);
 			$stmt->execute();
 			$stmt->rowCount();

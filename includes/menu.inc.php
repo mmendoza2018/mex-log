@@ -100,6 +100,7 @@
                 <li><a href="../admin/vistas/html/bitacora_cotizacionCOT.php">Historial de cotizaciones</a></li>
                 -->
                <li><a href="./?View=HistorialCompras">Historial de órdenes</a></li>
+               <li><a href="./?View=HistorialCompras2">Historial de órdenes</a></li>
 
                <!-- JCV SIN ESTAR EN SOLO PANTALLA INTERNA<li><a href="./vistas/html/new_compraOKJCV2.php">OTRA orden de compra</a></li> -->
 
@@ -127,8 +128,9 @@
           <a href="#"><i class="icon-calculator3"></i> <span>Logistica</span></a>
             <ul>
                 
-               <li><a href="./?View=NuevoRegistroEnvioProv">Registro de entregas</a></li>
-               <li><a href="./?View=HistorialEquiposaComprar">Historial de entregas</a></li>
+               <li><a href="./?View=NuevaEntradaLogistica">Registro de entregas</a></li>
+               <li><a href="./?View=TablaEntradaLogistica">Historial de entregas(proveedor)</a></li>
+               <li><a href="./?View=TablaSalidaLogisticaCliente">Historial de entregas(cliente)</a></li>
 
             </ul>
     </li>

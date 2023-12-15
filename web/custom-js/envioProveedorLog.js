@@ -1,328 +1,218 @@
-$(function () {
-  $(document).on("click", "#print_activos", function (e) {
-    Print_Report("Activos");
-    e.preventDefault();
-  });
-
-  $(document).on("click", "#print_inactivos", function (e) {
-    Print_Report("Inactivos");
-    e.preventDefault();
-  });
-  console.log("reloadTablaEnvioLog.php");
-
-  $(document).off("click", "#filtro_bancos"); ///JCV PARA QUE NO ESTE RECICLEANDO LA FUNCION Y SE VAYA INVREMENTANDOEL NUMERO DE VECESQUE SE REPITE CADA VEZ QUE SE ELIJE
-  $(document).on("click", "#filtro_bancos", function (e) {
-    //Print_Report('Vigentes');
-    //e.preventDefault();
-    //     alert('filtro');
-    // alert('filtro: '+$('#cbDecuentabanco').val());
-    buscar_datos();
-  });
-
-  ///JCV EL DEL FILTRO
-  $(".js-example-placeholder-single").select2({
-    placeholder: "SelecCCIONEE UNA CUENTA DE BANCO",
-    allowClear: true,
-  });
-
-  // Table setup
-  // ------------------------------
-
-  // Configuración de la datatable JCV CON EL SEARCHING ACTIVO O DESACTIVO LA OPCIÓN
-  $.extend($.fn.dataTable.defaults, {
-    searching: true,
-    autoWidth: false,
-    columnDefs: [
-      {
-        orderable: false,
-        width: "100px",
-      },
-    ],
-    dom: '<"datatable-header"fpl><"datatable-scroll"t><"datatable-footer"ip>',
-    language: {
-      search: "<span>Buscar:</span> _INPUT_",
-      lengthMenu: "<span>Ver:</span> _MENU_",
-      emptyTable: "No existen registros",
-      sZeroRecords: "No se encontraron resultados",
-      sInfoEmpty: "No existen registros que contabilizar",
-      sInfoFiltered: "(filtrado de un total de _MAX_ registros)",
-      sInfo:
-        "Mostrando del registro _START_ al _END_ de un total de _TOTAL_ datos",
-      paginate: {
-        first: "First",
-        last: "Last",
-        next: "&rarr;",
-        previous: "&larr;",
-      },
-    },
-    drawCallback: function () {
-      $(this)
-        .find("tbody tr")
-        .slice(-3)
-        .find(".dropdown, .btn-group")
-        .addClass("dropup");
-    },
-    preDrawCallback: function () {
-      $(this)
-        .find("tbody tr")
-        .slice(-3)
-        .find(".dropdown, .btn-group")
-        .removeClass("dropup");
-    },
-  });
-
-  // Basic datatable
-  $(".datatable-basic").DataTable();
-
-  // Add placeholder to the datatable filter option
-  $(".dataTables_filter input[type=search]").attr(
-    "placeholder",
-    "Escriba para filtrar..."
+const validarFormulario = (idFormulario) => {
+  const listaCampos = document.querySelectorAll(
+    `#${idFormulario} [data-validate]`
   );
-  //$('.dataTables_filter input[type=search]').val('BBVA').trigger("change");
+  let validacion = true;
 
-  // Enable Select2 select for the length option
-  $(".dataTables_length select").select2({
-    minimumResultsForSearch: Infinity,
-    width: "auto",
-  });
-
-  /* JCV HASTA AQUI PARA 2 FECHAS DE PRUEBA*/
-
-  jQuery.validator.addMethod(
-    "greaterThan",
-    function (value, element, param) {
-      /*alert('hola1');*/
-      var $min = $(param);
-      if (this.settings.onfocusout) {
-        $min
-          .off(".validate-greaterThan")
-          .on("blur.validate-greaterThan", function () {
-            $(element).valid();
-          });
+  if (listaCampos.length > 0) {
+    listaCampos.forEach((elemento) => {
+      const tipoElemento = elemento.getAttribute("type");
+      //validamos campos con value
+      if (elemento.value === "") {
+        validacion = false;
+        elemento.style.setProperty("border", "1px solid red");
+        setTimeout(() => {
+          elemento.style.setProperty("border", "");
+        }, 2000);
       }
-      return parseInt(value) > parseInt($min.val());
-    },
-    "Maximo debe ser mayor a minimo"
-  );
 
-  jQuery.validator.addMethod(
-    "lettersonly",
-    function (value, element) {
-      /* alert('hola2lettersonly');*/
-      return this.optional(element) || /^[a-z\s 0-9, / # . ()]+$/i.test(value);
-    },
-    "No se permiten caracteres especiales"
-  );
+      //validamos campos tipo checkbox
+      if (tipoElemento === "checkbox" && !elemento.checked) {
+        validacion = false;
+        elemento.style.setProperty("border", "1px solid red");
+        setTimeout(() => {
+          elemento.style.setProperty("border", "");
+        }, 2000);
+      }
 
-  var validator = $("#frmModal").validate({
-    ignore: ".select2-search__field", // ignore hidden fields
-    errorClass: "validation-error-label",
-    successClass: "validation-valid-label",
+      //validamos campos tipo radio
+      if (tipoElemento === "radio") {
+        const name = elemento.getAttribute("name");
+        const inputsRadio = document.querySelectorAll(
+          `input[type="radio"][name="${name}"]`
+        );
+        let checked = false;
 
-    highlight: function (element, errorClass) {
-      $(element).removeClass(errorClass);
-    },
-    unhighlight: function (element, errorClass) {
-      $(element).removeClass(errorClass);
-    },
-    // Different components require proper error label placement
-    errorPlacement: function (error, element) {
-      //alert('hola3errorelement');
-      // Styled checkboxes, radios, bootstrap switch
-      if (
-        element.parents("div").hasClass("checker") ||
-        element.parents("div").hasClass("choice") ||
-        element.parent().hasClass("bootstrap-switch-container")
-      ) {
-        if (
-          element.parents("label").hasClass("checkbox-inline") ||
-          element.parents("label").hasClass("radio-inline")
-        ) {
-          error.appendTo(element.parent().parent().parent().parent());
-        } else {
-          error.appendTo(element.parent().parent().parent().parent().parent());
+        inputsRadio.forEach((radio) => {
+          if (radio.checked) {
+            checked = true;
+          }
+        });
+
+        if (!checked) {
+          validacion = false;
         }
       }
-
-      // Unstyled checkboxes, radios
-      else if (
-        element.parents("div").hasClass("checkbox") ||
-        element.parents("div").hasClass("radio")
-      ) {
-        error.appendTo(element.parent().parent().parent());
-      }
-
-      // Input with icons and Select2
-      else if (
-        element.parents("div").hasClass("has-feedback") ||
-        element.hasClass("select2-hidden-accessible")
-      ) {
-        error.appendTo(element.parent());
-      }
-
-      // Inline checkboxes, radios
-      else if (
-        element.parents("label").hasClass("checkbox-inline") ||
-        element.parents("label").hasClass("radio-inline")
-      ) {
-        error.appendTo(element.parent().parent());
-      }
-
-      // Input group, styled file input
-      else if (
-        element.parent().hasClass("uploader") ||
-        element.parents().hasClass("input-group")
-      ) {
-        error.appendTo(element.parent().parent());
-      } else {
-        error.insertAfter(element);
-      }
-    },
-
-    rules: {
-      /* txtFecha:{
-          maxlength:20,
-          minlength: 6,
-          required: true,
-          /*date:true,*/
-      /*format: 'DD/MM/YYYY'*/
-      /*viewDate: moment()*/
-
-      txtF1: {
-        required: true,
-      },
-
-      /*txtRegistro:{
-         maxlength:70,
-         required: true
-        },*/
-      txtIngreso: {
-        /*maxlength:15,*/
-        number: true,
-        required: true,
-        /*min:1*/
-      },
-      txtSaldo: {
-        number: true,
-      },
-      txtEgreso: {
-        number: true,
-      },
-      txtObservaciones: {
-        maxlength: 120,
-        required: true,
-      },
-
-      cbDebanco: {
-        required: true,
-      },
-      cbDeregistro: {
-        required: true,
-      },
-    },
-
-    validClass: "validation-valid-label",
-    success: function (label) {
-      label.addClass("validation-valid-label").text("Correcto");
-    },
-
-    submitHandler: function (form) {
-      //alert('enviarfrm');
-      enviar_frm();
-    },
-  });
-
-  /* $("#txtCuenta").TouchSpin({
-         min: 0.00,
-         max: 1000000,
-         step: 1.00,
-         decimals: 2,
-         prefix: '$'
-     });*/
-
-  $("#btnEditar").hide();
-
-  $(".select-search").select2(); // JCV PARA QUE APAREZCA  BUSCAR EN EL COMBO BOX
-
-  /*Evento change de ChkEstado en el cual al chequear o deschequear cambia el label*/
-  $("#chkEstado").change(function () {
-    if (this.checked) {
-      $("#chkEstado").val(true);
-      document.getElementById("lblchk").innerHTML = "VIGENTE";
-    } else {
-      $("#chkEstado").val(false);
-      document.getElementById("lblchk").innerHTML = "DESCONTINUADO";
-    }
-  });
-
-  $.fn.modal.Constructor.prototype.enforceFocus = function () {};
-
-  /*JCV PARA BORRAR*/
-  $(document).on("click", "#delete_librodiario", function (e) {
-    var productId = $(this).data("id");
-    SwalDelete(productId);
-    e.preventDefault();
-  });
-});
+    });
+  }
+  return validacion;
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   //obtenerTablaOrdenesCompra();
 });
 
-const obtenerDataOrdenCompra = (elemento = false) => {
-  let data = false;
-  if (elemento) {
-    data = elemento.value;
+const obtenerDataOrdenCompra = (idSelect = false, isUpdate = false) => {
+  let idOrdenCompra = false;
+  let idEntradalogistica = false;
+  if (idSelect) {
+    idOrdenCompra = document.getElementById(idSelect).value;
   }
+  if (isUpdate) {
+    idEntradalogistica = document.getElementById("idEntradalog").value;
+  }
+  let data = `idOrdenCompra=${idOrdenCompra}&idEntradalogistica=${idEntradalogistica}`;
+  console.log("data :>> ", data);
   $.ajax({
     url: "web/ajax/ajxOrdenCompra.php",
     type: "POST",
-    data: { idOrdenCompra: data },
+    data: data,
     dataType: "json",
     success: function (response) {
+      console.log("response :>> ", response);
+      if (document.getElementById("tbodyEntradaLog") !== null) {
+        document.getElementById("tbodyEntradaLog").innerHTML = "";
+      }
       // Manejar la respuesta exitosa aquí
       let selectCliente = document.getElementById("selectClienteRegLog");
       let selectTipoCompra = document.getElementById("selectTipoCompraRegLog");
-      if (response.length > 0) {
-
-        const {id_cliente, tipo_compra} = response[0];
+      if (response.detalle.length > 0) {
+        const { id_cliente, tipo_compra } = response.detalle[0];
 
         $("#selectTipoCompraRegLog").val(tipo_compra).trigger("change");
         $("#selectClienteRegLog").val(id_cliente).trigger("change");
 
-        selectTipoCompra.setAttribute("disabled", "true")
-        selectCliente.setAttribute("disabled", "true")
+        selectTipoCompra.setAttribute("disabled", "true");
+        selectCliente.setAttribute("disabled", "true");
 
         //damos valor a los campos ocultos
         document.getElementById("selectClienteRegLog2").value = id_cliente;
         document.getElementById("selectTipoCompraRegLog2").value = tipo_compra;
-
-      } else {
-
+        if (document.getElementById("addProductoEntradaLog") !== null ) {
+          document.getElementById("addProductoEntradaLog").style.display = "none";
+        }
+      }
+      else if (!isUpdate) {
         $("#selectTipoCompraRegLog").val("");
         $("#selectClienteRegLog").val("").trigger("change");
-        selectTipoCompra.removeAttribute("disabled")
-        selectCliente.removeAttribute("disabled")
-
+        selectTipoCompra.removeAttribute("disabled");
+        selectCliente.removeAttribute("disabled");
+        document.getElementById("addProductoEntradaLog").style.display =
+          "block";
       }
-      console.log('response :>> ', response);
-      
+
+      if (response.productos.length > 0) {
+        //agregamos todos los productos
+
+        let tBody = document.getElementById("tbodyEntradaLog");
+        response.productos.forEach((producto) => {
+          const {
+            codigo_producto,
+            id_producto,
+            descripcion_producto,
+            nombre_proveedor,
+          } = producto;
+          let tr = `<tr>
+                    <td style="display:none">${id_producto}</td>
+                    <td>${codigo_producto}</td>
+                    <td>${descripcion_producto}</td>
+                    <td>${nombre_proveedor}</td>
+                    <td style="display:${isUpdate ? 'none' : 'block' }"> <a class="btn btn-danger p-0" href="javascript:;" onclick="removerElemento(this)">
+                    <i class="fa fa-plus">-</i>
+                  </a></td>
+                  </tr>`;
+          tBody.insertAdjacentHTML("beforeend", tr);
+        });
+      }
     },
   });
 };
 
 const obtenerClientes = () => {
-
   $.ajax({
     url: "controller/Cliente_controller.php",
     type: "POST",
     data: { idOrdenCompra: data },
+
     success: function (response) {
       // Manejar la respuesta exitosa aquí
       $("#containerTableOC").html(response);
     },
   });
+};
+
+const obtenerListaEntradasPorVenta = (idVenta) => {
+  $.ajax({
+    url: "web/ajax/reloadTablaVentaslog.php",
+    type: "POST",
+    data: { idVenta: idVenta },
+    success: function (response) {
+      // Manejar la respuesta exitosa aquí
+      $("#llegaTablaVentalog").html(response);
+    },
+  });
+};
+
+const obtenerListaSalidasPorVenta = (idVenta) => {
+  $.ajax({
+    url: "web/ajax/reloadTablaSalidaslog.php",
+    type: "POST",
+    data: { idVenta: idVenta },
+    success: function (response) {
+      // Manejar la respuesta exitosa aquí
+      $("#llegaTablaSalidaslog").html(response);
+    },
+  });
+};
+
+const obtenerDetalleProducto = (idProducto) => {
+  $.ajax({
+    url: "web/ajax/ajxproductos.php",
+    type: "POST",
+    data: { idProducto: idProducto },
+    dataType: "json",
+    success: function (response) {
+      // Manejar la respuesta exitosa aquí
+      const {
+        codigo_producto,
+        id_producto,
+        descripcion_producto,
+        nombre_proveedor,
+      } = response[0];
+      let tBody = document.getElementById("tbodyEntradaLog");
+      let tr = `<tr>
+      <td style="display:none">${id_producto}</td>
+      <td>${codigo_producto}</td>
+      <td>${descripcion_producto}</td>
+      <td>${nombre_proveedor}</td>
+      <td> <a class="btn btn-danger p-0" href="javascript:;" onclick="removerElemento(this)">
+      <i class="fa fa-plus">-</i>
+    </a></td>
+      </tr>`;
+      tBody.insertAdjacentHTML("beforeend", tr);
+    },
+  });
+};
+
+const clonarElemento = (idElemento, valor = "") => {
+  let elemento = document.getElementById(idElemento);
+  let clone = elemento.cloneNode(true);
+  clone.querySelectorAll("input").forEach((e) => (e.value = valor));
+  elemento.parentElement.insertAdjacentElement("beforeend", clone);
+};
+const QuitarElemento = (elemento) => {
+  let cloneElement = elemento.parentElement.parentElement.parentElement;
+  let numeroInputs =
+    cloneElement.parentElement.querySelectorAll(".row[data-clone]");
+  //console.log(cloneElement, numeroInputs);
+  if (numeroInputs.length > 1) {
+    cloneElement.remove();
+  }
+};
+
+const removerElemento = (elemento) => {
+  let tr = elemento.parentNode.parentNode;
+  tr.remove();
 };
 
 function sumarInputs(idInput1, idInput2, idResultado) {
@@ -342,24 +232,134 @@ function sumarInputs(idInput1, idInput2, idResultado) {
 }
 
 const enviarRegistroLog = () => {
-
-  var formData = $("#formRegistroCompraLog").serialize();
-  if ($("#selectOCompraRegLog").val() === "") {
-    
+  if (!validarFormulario("formRegistroCompraLog")) {
+    sweetAlert({
+      icon: "success", // Puedes usar 'success', 'error', 'warning', 'info', etc.
+      title: "error",
+      type: "error",
+      text: "Complete todos los campos requeridos",
+      showConfirmButton: false, // No mostrar el botón de confirmación
+      timer: 1000, // El tiempo en milisegundos antes de que la notificación se cierre automáticamente
+    });
+    return;
   }
-  formData += '&dato1=valor1&dato2=valor2';
-  $.ajax({
-    url: "controller/Cliente_controller.php",
-    type: "POST",
-    data: formData,
-    success: function (response) {
-      // Manejar la respuesta exitosa aquí
-      $("#containerTableOC").html(response);
-    },
+  let tbody = document.querySelectorAll("#tbodyEntradaLog tr");
+  let formData = $("#formRegistroCompraLog").serialize();
+  let id_cliente = null;
+  let tipo_entrada = null;
+
+  if ($("#selectOCompraRegLog").val() === "") {
+    id_cliente = $("#selectClienteRegLog").val();
+    tipo_entrada = $("#selectTipoCompraRegLog").val();
+
+    if (tbody.length <= 0) {
+      sweetAlert({
+        icon: "success", // Puedes usar 'success', 'error', 'warning', 'info', etc.
+        title: "error",
+        type: "error",
+        text: "Agregue Productos",
+        showConfirmButton: false, // No mostrar el botón de confirmación
+        timer: 1000, // El tiempo en milisegundos antes de que la notificación se cierre automáticamente
+      });
+      return;
+    }
+  } else {
+    id_cliente = $("#selectClienteRegLog2").val();
+    tipo_entrada = $("#selectTipoCompraRegLog2").val();
+  }
+  let idsProducto = "";
+  tbody.forEach((element) => {
+    let idProducto = element.querySelector("td").textContent;
+    idsProducto += idProducto + "|";
   });
 
-}
+  idsProducto = idsProducto.slice(0, -1);
+  formData += `&id_cliente=${id_cliente}&tipo_entrada=${tipo_entrada}&idsProducto=${idsProducto}&proceso=Registro`;
+  $.ajax({
+    url: "web/ajax/entradaLogistica.php",
+    type: "POST",
+    data: formData,
+    dataType: "json",
+    success: function (response) {
+      // Manejar la respuesta exitosa aquí
+      console.log("response :>> ", response);
+      if (response === "Validado") {
+        swal({
+          title: "Exito!",
+          text: "Entrada registrada",
+          confirmButtonColor: "#66BB6A",
+          type: "success",
+        });
+        $("#formRegistroCompraLog")[0].reset();
+        $("#selectOCompraRegLog").val(null).trigger("change");
+        $("#selectClienteRegLog").val(null).trigger("change");
+        document.getElementById("tbodyEntradaLog").innerHTML = "";
+      }
+    },
+    error: function () {
+      swal({
+        title: "Lo sentimos...",
+        text: "Algo sucedio mal!",
+        confirmButtonColor: "#EF5350",
+        type: "error",
+      });
+    },
+  });
+};
 
+const actualizarRegistroLog = () => {
+  if (!validarFormulario("formRegistroCompraLogAct")) {
+    sweetAlert({
+      icon: "success", // Puedes usar 'success', 'error', 'warning', 'info', etc.
+      title: "error",
+      type: "error",
+      text: "Complete todos los campos requeridos",
+      showConfirmButton: false, // No mostrar el botón de confirmación
+      timer: 1000, // El tiempo en milisegundos antes de que la notificación se cierre automáticamente
+    });
+    return;
+  }
+  let formData = $("#formRegistroCompraLogAct").serialize();
+  let id_cliente = null;
+  let tipo_entrada = null;
+
+  if ($("#selectOCompraRegLog").val() === "") {
+    id_cliente = $("#selectClienteRegLog").val();
+    tipo_entrada = $("#selectTipoCompraRegLog").val();
+  } else {
+    id_cliente = $("#selectClienteRegLog2").val();
+    tipo_entrada = $("#selectTipoCompraRegLog2").val();
+  }
+
+  formData += `&id_cliente=${id_cliente}&tipo_entrada=${tipo_entrada}&proceso=Edicion`;
+
+  $.ajax({
+    url: "web/ajax/entradaLogistica.php",
+    type: "POST",
+    data: formData,
+    dataType: "json",
+    success: function (response) {
+      // Manejar la respuesta exitosa aquí
+      console.log("response :>> ", response);
+      if (response === "Validado") {
+        swal({
+          title: "Exito!",
+          text: "Entrada Actualizada",
+          confirmButtonColor: "#66BB6A",
+          type: "success",
+        });
+      }
+    },
+    error: function () {
+      swal({
+        title: "Lo sentimos...",
+        text: "Algo sucedio mal!",
+        confirmButtonColor: "#EF5350",
+        type: "error",
+      });
+    },
+  });
+};
 
 function limpiarform() {
   var form = $("#frmModal").validate();
